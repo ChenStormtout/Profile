@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700;900&family=Merriweather:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #68d391; /* Hijau Mint */
+            --secondary-color: #38a169; /* Hijau Tua */
+            --dark-bg: #1a202c; /* Hampir Hitam */
+            --darker-bg: #2d3748; /* Abu-abu Gelap */
+            --text-light: #e2e8f0; /* Putih Kebiruan */
+            --text-muted: #a0aec0; /* Abu-abu Sedang */
+            --accent-orange: #d69e2e; /* Oranye Kunyit */
+            --blur-strength: 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.65;
+            color: var(--text-muted);
+            background: linear-gradient(rgba(26, 32, 44, 0.9), rgba(26, 32, 44, 0.9)), 
+                        url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80') center/cover fixed;
+            overflow-x: hidden;
+            font-weight: 400;
+            letter-spacing: 0.025em;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* General Layout & Components */
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(104, 211, 145, 0.3); /* Using var for --primary-color */
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cursor, .cursor-follower {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            border-radius: 50%;
+            opacity: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s ease-in-out, transform 0.1s ease-out;
+            z-index: 9999;
+        }
+
+        .cursor {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--primary-color);
+            background-color: rgba(104, 211, 145, 0.1); /* Using var for --primary-color */
+        }
+
+        .cursor.active, .cursor-follower.active {
+            opacity: 1;
+        }
+
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            z-index: 1001;
+            transition: width 0.1s ease;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(104, 211, 145, 0.6); /* Using var for --primary-color */
+            border-radius: 50%;
+            animation: float-particle 15s infinite linear;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: rotate-shape 20s infinite linear;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, var(--primary-color), transparent);
+            border-radius: 50%;
+        }
+
+        .shape:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--accent-orange), transparent);
+            transform: rotate(45deg);
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, var(--secondary-color), transparent);
+            border-radius: 20%;
+        }
+
+        @keyframes rotate-shape {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease-out;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50%;
+            cursor: pointer;
+            backdrop-filter: blur(var(--blur-strength));
+            transition: background 0.3s ease;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .music-player {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(45, 55, 72, 0.95); /* Using var for --darker-bg */
+            border-radius: 50px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(var(--blur-strength));
+            border: 1px solid rgba(104, 211, 145, 0.2); /* Using var for --primary-color */
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-player:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .player-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .player-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-btn.next-prev {
+            background: transparent;
+            font-size: 1rem;
+            border: 1px solid rgba(var(--primary-color), 0.5);
+            width: 30px;
+            height: 30px;
+            color: var(--primary-color);
+        }
+
+        .player-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .music-info {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
+        .music-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .music-artist {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 32, 44, 0.95); /* Using var for --dark-bg */
+            backdrop-filter: blur(var(--blur-strength));
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(26, 32, 44, 0.98); /* Using var for --dark-bg */
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-family: 'Merriweather', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            letter-spacing: 0.1em;
+        }
+
+        .logo:hover {
+            color: var(--secondary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(rgba(26, 32, 44, 0.7), rgba(26, 32, 44, 0.8)), 
+                        url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover;
+            overflow: hidden;
+            background-attachment: fixed;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 32, 44, 0.4);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+
+        .hero-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            margin-top: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            border: 4px solid rgba(104, 211, 145, 0.3); /* Using var for --primary-color */
+            overflow: hidden;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .hero-image:hover {
+            transform: scale(1.05);
+        }
+
+        .hero h1 {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: slideUp 1s ease 0.5s forwards;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .hero .tagline {
+            font-family: 'Merriweather', serif;
+            font-size: clamp(1.3rem, 2.8vw, 1.8rem);
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: slideUp 1s ease 0.7s forwards;
+            font-weight: 300;
+            font-style: italic;
+            letter-spacing: 0.05em;
+        }
+
+        .hero .description {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            opacity: 0;
+            animation: slideUp 1s ease 0.9s forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-animation {
+            border-right: 2px solid var(--primary-color);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: transparent; }
+            51%, 100% { border-color: var(--primary-color); }
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(104, 211, 145, 0.3); /* Using var for --primary-color */
+            opacity: 0;
+            animation: slideUp 1s ease 1.1s forwards;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(104, 211, 145, 0.4); /* Using var for --primary-color */
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 5rem 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        .section h2 {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--text-light);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .about {
+            background: linear-gradient(rgba(45, 55, 72, 0.8), rgba(45, 55, 72, 0.9)), 
+                        url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover;
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(var(--blur-strength));
+            background-attachment: fixed;
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+            font-weight: 400;
+            letter-spacing: 0.025em;
+        }
+
+        /* === CSS BARU UNTUK GALERI === */
+        
+        .gallery-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .gallery-teaser {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            backdrop-filter: blur(var(--blur-strength));
+            border: 1px solid rgba(104, 211, 145, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .gallery-teaser:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .gallery-teaser img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .gallery-teaser .gallery-caption {
+            background: rgba(45, 55, 72, 0.8);
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-light);
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .show-all-photos-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(104, 211, 145, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .show-all-photos-btn:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 8px 20px rgba(104, 211, 145, 0.4);
+        }
+
+        .gallery-content-wrapper {
+            display: none;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.5s ease;
+        }
+
+        .gallery-content-wrapper.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .gallery-item {
+            background: rgba(45, 55, 72, 0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(var(--blur-strength));
+            border: 1px solid rgba(104, 211, 145, 0.1);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(104, 211, 145, 0.1);
+        }
+
+        .gallery-caption {
+            padding: 1rem;
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .hide-photos-btn {
+            display: block;
+            margin: 2rem auto 0;
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: fit-content;
+        }
+
+        .hide-photos-btn:hover {
+            background: var(--primary-color);
+            color: var(--darker-bg);
+            box-shadow: 0 5px 15px rgba(104, 211, 145, 0.3);
+        }
+        
+        /* === AKHIR DARI CSS BARU UNTUK GALERI === */
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(45, 55, 72, 0.4); /* Using var for --darker-bg */
+            color: var(--text-muted);
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(104, 211, 145, 0.1); /* Using var for --primary-color */
+            backdrop-filter: blur(var(--blur-strength));
+        }
+
+        .social-link:hover {
+            background: rgba(104, 211, 145, 0.1); /* Using var for --primary-color */
+            color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(rgba(26, 32, 44, 0.95), rgba(26, 32, 44, 0.98)), 
+                        url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80') center/cover fixed;
+            color: var(--text-muted);
+            backdrop-filter: blur(var(--blur-strength));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+            
+            .section {
+                padding: 3rem 1rem;
+            }
+            
+            .section h2 {
+                font-size: 2rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .social-links {
+                gap: 1rem;
+            }
+            
+            .music-player {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.8rem 1.2rem;
+                gap: 0.8rem;
+            }
+            .music-info {
+                min-width: unset;
+                max-width: 100px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-image {
+                width: 150px;
+                height: 150px;
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .social-link {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .music-player {
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 1rem;
+                right: unset;
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loading">
+        <div class="loader"></div>
+    </div>
+
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursor-follower"></div>
+    
+    <div class="scroll-progress" id="scroll-progress"></div>
+    
+    <div class="particles" id="particles"></div>
+    
+    <div class="bg-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightbox-close">×</button>
+        <img id="lightbox-img" src="" alt="Gallery Image">
+    </div>
+
+    <div class="music-player" id="music-player">
+        <div class="player-controls">
+            <button class="player-btn next-prev" id="prev-btn">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            <button class="player-btn" id="play-btn">
+                <i class="fas fa-play" id="play-icon"></i>
+            </button>
+            <button class="player-btn next-prev" id="next-btn">
+                <i class="fas fa-step-forward"></i>
+            </button>
+        </div>
+        <div class="music-info">
+            <div class="music-title" id="music-title"></div>
+            <div class="music-artist" id="music-artist"></div>
+        </div>
+    </div>
+
+    <audio id="background-music" loop></audio>
+    <audio id="click-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-small-hit-pop-3129.mp3" preload="auto"></audio>
+
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Dewa Setya</a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#social">Social Media</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-image">
+                <img src="wawaa (1).jpg" alt="Foto Profil Anda"> 
+            </div>
+            <h1><span id="typing-text"></span></h1>
+            <p class="tagline">Explore My World: Photography and Beyond</p>
+            <p class="description">Welcome to my personal space on the web. Here, you’ll find a glimpse into my life through carefully captured moments, a selection of my favorite visuals, and a chance to connect with me on social media. I hope each image tells a piece of my story and invites you to see the world through my eyes.</p>
+            <a href="#gallery" class="cta-button">Lihat Galeri Foto</a>
+        </div>
+    </section>
+
+    <section id="about" class="section">
+        <div class="about reveal">
+            <h2>About Me</h2>
+            <div class="about-content">
+                <p>"Hello! I’m Dewa, and this is my personal space on the internet. I enjoy the simple things in life, I like living, exploring the realms of the digital world, the human mind, and nature. I’m not looking to showcase any projects, I’m happy to share a little about my interests and life here."</p>
+                <p>I believe that everyone has a unique story to share, and through this platform, I hope you can get to know me better. Enjoy exploring my small photo gallery, and feel free to connect with me on social media!</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="section">
+        <h2 class="reveal">Smoll Gallery</h2>
+        <div class="gallery-container">
+            <div class="gallery-teaser reveal">
+                <img src="sayang.jpg" alt="Foto Utama Galeri">
+                <div class="gallery-caption">Galeri Foto</div>
+                <button class="show-all-photos-btn" id="show-all-photos">Lihat Semua Foto <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <div class="gallery-content-wrapper" id="gallery-content-wrapper">
+                <div class="gallery-grid">
+                    <div class="gallery-item" data-img-src="1.jpg">
+                        <img src="1.jpg" alt="Pemandangan Alam">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="2.jpg">
+                        <img src="2.jpg">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="3.jpg">
+                        <img src="3.jpg" alt="">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="4.jpg">
+                        <img src="4.jpg" alt="Fotografi Makanan">                        
+                        <div class="gallery-caption"></div>
+                    </div>
+                    
+                    <div class="gallery-item" data-img-src="6.jpg">
+                        <img src="6.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="7.jpg">
+                        <img src="7.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="8.jpg">
+                        <img src="8.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="9.jpg">
+                        <img src="9.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="10.jpg">
+                        <img src="10.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="11.jpg">
+                        <img src="11.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="12.jpg">
+                        <img src="12.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="13.jpg">
+                        <img src="13.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="14.jpg">
+                        <img src="14.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    
+                    <div class="gallery-item" data-img-src="16.jpg">
+                        <img src="16.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="17.jpg">
+                        <img src="17.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="18.jpg">
+                        <img src="18.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="19.jpg">
+                        <img src="19.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    <div class="gallery-item" data-img-src="20.jpg">
+                        <img src="20.jpg" alt="Fotografi Makanan">
+                        <div class="gallery-caption"></div>
+                    </div>
+                    
+                </div>
+                <button class="hide-photos-btn" id="hide-photos">Sembunyikan Galeri <i class="fas fa-arrow-left"></i></button>
+            </div>
+        </div>
+    </section>
+    <section id="social" class="section">
+        <h2 class="reveal">Connect with Me</h2>
+        <div class="social-links reveal">
+            <a href="https://www.instagram.com/poatan___" target="_blank" class="social-link">
+                <i class="fab fa-instagram"></i> Instagram
+            </a>
+            <a href="https://boxd.it/fBlIt" target="_blank" class="social-link">
+                <i class="fa-solid fa-film"></i> Letterboxd
+            </a>
+            <a href="https://i.pinimg.com/736x/8b/18/c0/8b18c0f3a8835cf33775c6e2a1ff018e.jpg" target="_blank" class="social-link">
+                <i class="fa-brands fa-imdb"></i> IMDb
+            </a>
+            <a href="https://i.pinimg.com/736x/8b/18/c0/8b18c0f3a8835cf33775c6e2a1ff018e.jpg" target="_blank" class="social-link">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+            <a href="https://i.pinimg.com/736x/8b/18/c0/8b18c0f3a8835cf33775c6e2a1ff018e.jpg" target="_blank" class="social-link">
+                <i class="fab fa-linkedin"></i> LinkedIn
+            </a>
+            <a href="https://dewadewaa.blogspot.com/" target="_blank" class="social-link">
+                <i class="fas fa-blog"></i> Blog
+            </a>
+            <a href="mailto:dewasetya6@gmail.com" target="_blank" class="social-link">
+                <i class="fas fa-envelope"></i> Email
+            </a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2025 Dewa Setya. Dibuat dengan <span ></span> </p>
+        
+    </footer>
+
+    <script>
+        // Loading Overlay
+        window.addEventListener('load', () => {
+            const loadingOverlay = document.getElementById('loading');
+            loadingOverlay.classList.add('hidden');
+            loadingOverlay.addEventListener('transitionend', () => {
+                loadingOverlay.remove();
+            });
+        });
+
+        // Custom Cursor
+        const cursor = document.getElementById('cursor');
+        const cursorFollower = document.getElementById('cursor-follower');
+        const interactableElements = 'a, button, .project-card, .social-link, .gallery-item, .show-all-photos-btn, .hide-photos-btn';
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorFollower.style.left = e.clientX + 'px';
+            cursorFollower.style.top = e.clientY + 'px';
+            
+            cursor.classList.add('active');
+            cursorFollower.classList.add('active');
+        });
+
+        document.querySelectorAll(interactableElements).forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(0)';
+                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                cursorFollower.style.backgroundColor = 'rgba(104, 211, 145, 0.3)';
+            });
+
+            element.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1)';
+                cursorFollower.style.backgroundColor = 'rgba(104, 211, 145, 0.1)';
+            });
+        });
+
+        // Scroll Progress Bar
+        const scrollProgress = document.getElementById('scroll-progress');
+        document.addEventListener('scroll', () => {
+            const totalScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (totalScroll / windowHeight) * 100;
+            scrollProgress.style.width = progress + '%';
+        });
+
+        // Typing Animation
+        const typingTextElement = document.getElementById('typing-text');
+        const phrases = ["Dewaa"];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 10;
+       
+
+        function type() {
+            const currentPhrase = phrases[phraseIndex];
+            if (isDeleting) {
+                typingTextElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+                typingSpeed = 150;
+            } else {
+                typingTextElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+                typingSpeed = 150;
+            }
+
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                setTimeout(() => isDeleting = true, delayBetweenPhrases);
+                typingSpeed = 2000;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                typingSpeed = 500;
+            }
+
+            setTimeout(type, typingSpeed);
+        }
+        type();
+        
+        // Scroll Reveal
+        function revealElements() {
+            const reveals = document.querySelectorAll('.reveal');
+            for (let i = 0; i < reveals.length; i++) {
+                const windowHeight = window.innerHeight;
+                const elementTop = reveals[i].getBoundingClientRect().top;
+                const elementVisible = 150;
+
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add('active');
+                } else {
+                    reveals[i].classList.remove('active');
+                }
+            }
+        }
+        window.addEventListener('scroll', revealElements);
+        window.addEventListener('load', revealElements);
+
+        // Lightbox functionality
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.getElementById('lightbox-close');
+
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const imgSrc = item.getAttribute('data-img-src');
+                lightboxImg.src = imgSrc;
+                lightbox.classList.add('active');
+            });
+        });
+
+        lightboxClose.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+        
+        // Music Player
+        const musicPlayer = document.getElementById('music-player');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const musicTitle = document.getElementById('music-title');
+        const musicArtist = document.getElementById('music-artist');
+        const backgroundMusic = document.getElementById('background-music');
+
+        
+            const playlist = [
+            
+            {
+                title: "The Luckiest",
+                artist: "Ben Folds",
+                src: "The Luckiest.mp3"
+            },
+            {
+                title: "Emerald Eyes",
+                artist: "Anson Seabra",
+                src: "anson.mp3"
+            },
+            {
+                title: "Bakadarou",
+                artist: "Infinite Wealth ost",
+                src: "bakadarou.mp3"
+            },
+            {
+                title: "Lost Stars",
+                artist: "Keira Knightley",
+                src: "lost stars.mp3"
+            },
+            
+            {
+                title: "First Love",
+                artist: "Ardhito Pramono",
+                src: "first love.mp3"
+            },
+           
+            {
+                title: "Lay Me Down",
+                artist: "Michael Pangilinan ",
+                src: "LAY ME.mp3"
+            },
+            {
+                title: "Like a Fool",
+                artist: "Keira Knightley",
+                src: "Like a Fool.mp3"
+            }
+        ];
+
+        let currentTrackIndex = 0;
+
+        function loadTrack(trackIndex) {
+            const track = playlist[trackIndex];
+            backgroundMusic.src = track.src;
+            musicTitle.textContent = track.title;
+            musicArtist.textContent = track.artist;
+        }
+
+        function playMusic() {
+            backgroundMusic.play();
+            playIcon.classList.remove('fa-play');
+            playIcon.classList.add('fa-pause');
+        }
+
+        function pauseMusic() {
+            backgroundMusic.pause();
+            playIcon.classList.remove('fa-pause');
+            playIcon.classList.add('fa-play');
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (backgroundMusic.paused) {
+                playMusic();
+            } else {
+                pauseMusic();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(currentTrackIndex);
+            playMusic();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadTrack(currentTrackIndex);
+            playMusic();
+        });
+
+        loadTrack(currentTrackIndex); // Load the first track on page load
+
+        // Logika untuk galeri tersembunyi
+        const showPhotosBtn = document.getElementById('show-all-photos');
+        const hidePhotosBtn = document.getElementById('hide-photos');
+        const galleryTeaser = document.querySelector('.gallery-teaser');
+        const galleryWrapper = document.getElementById('gallery-content-wrapper');
+
+        showPhotosBtn.addEventListener('click', () => {
+            galleryTeaser.style.display = 'none';
+            galleryWrapper.style.display = 'block';
+            setTimeout(() => {
+                galleryWrapper.classList.add('visible');
+            }, 10);
+            
+            // Pindahkan scroll ke bagian galeri
+            document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        hidePhotosBtn.addEventListener('click', () => {
+            galleryWrapper.classList.remove('visible');
+            setTimeout(() => {
+                galleryWrapper.style.display = 'none';
+                galleryTeaser.style.display = 'block';
+            }, 500); 
+
+            // Pindahkan scroll ke bagian galeri
+            document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
